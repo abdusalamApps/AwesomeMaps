@@ -27,4 +27,6 @@ public abstract class Place {
         this.category = category;
     }
 
+
+
 }

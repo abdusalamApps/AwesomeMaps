@@ -9,13 +9,13 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class PhotoMap {
-    Map<Position, Place> allPlaces;
-    Set<Place> hidden;
-    Set<Place> marked;
+public class MapData {
+    private Map<Position, Place> allPlaces;
+    private Set<Place> hidden;
+    private Set<Place> marked;
 
-    public PhotoMap(Map<Position, Place> allPlaces) {
-        this.allPlaces = allPlaces;
+    public MapData() {
+        allPlaces = new HashMap<>();
         hidden = new HashSet<>();
         marked = new HashSet<>();
     }
@@ -55,19 +55,13 @@ public class PhotoMap {
 
     public void remove() {
         for (Place place : marked) {
-            allPlaces.remove(getKey(place));
-            hidden.remove(place);
-            marked.remove(place);
+            allPlaces.entrySet()
+                    .removeIf( entry -> (
+                            place.equals(entry.getValue()
+                            )
+                    ));
         }
-    }
-
-    // A helper method to find the key for a specific Place-object
-    // in allPlaces map
-    private Position getKey(Place place) {
-        for (Map.Entry<Position, Place> entry : allPlaces.entrySet()) {
-            if (entry.getValue().equals(place)) return entry.getKey();
-        }
-        return null;
+        marked.clear();
     }
 
     public String getPlaceByCoordinates(int x, int y) {
@@ -95,14 +89,48 @@ public class PhotoMap {
                 new Position(1, 5),
                 new NamedPlace("Gatan", new BusCategory())
         );
-        PhotoMap photoMap = new PhotoMap(map);
+        MapData mapData = new MapData();
+        mapData.setAllPlaces(map);
 
         System.out.println("------getPlaceByCoordinates() return value-------");
-        System.out.println(photoMap.getPlaceByCoordinates(1, 4));
+        System.out.println(mapData.getPlaceByCoordinates(1, 4));
 
         System.out.println("------Marked Places-----");
-        for (Place place : photoMap.marked)
+        for (Place place : mapData.marked)
             System.out.println(place.getName());
 
+    }
+
+    public Map<Position, Place> getAllPlaces() {
+        return allPlaces;
+    }
+
+    public void setAllPlaces(Map<Position, Place> allPlaces) {
+        this.allPlaces = allPlaces;
+    }
+
+    public void printAllPlaces() {
+        for (Map.Entry<Position, Place> entry : allPlaces.entrySet()) {
+            System.out.println("Position: " + entry.getKey().getX() + ", " + entry.getKey().getY() + " | "
+            + "Place: " + entry.getValue().getName() + ", "
+            + entry.getValue().getCategory().getName() + ", "
+            );
+        }
+    }
+
+    public Set<Place> getHidden() {
+        return hidden;
+    }
+
+    public void setHidden(Set<Place> hidden) {
+        this.hidden = hidden;
+    }
+
+    public Set<Place> getMarked() {
+        return marked;
+    }
+
+    public void setMarked(Set<Place> marked) {
+        this.marked = marked;
     }
 }

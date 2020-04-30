@@ -3,7 +3,7 @@ package model;
 import java.util.Objects;
 
 public class Position {
-    int x, y;
+    private int x, y;
 
     public Position(int x, int y) {
         this.x = x;
@@ -22,5 +22,21 @@ public class Position {
     @Override
     public int hashCode() {
         return Objects.hash(x, y);
+    }
+
+    public int getX() {
+        return x;
+    }
+
+    public void setX(int x) {
+        this.x = x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
+    public void setY(int y) {
+        this.y = y;
     }
 }

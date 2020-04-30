@@ -1,6 +1,6 @@
 package model.category;
 
-import java.awt.*;
+import javafx.scene.paint.Color;
 
 public class UndergroundCategory extends BlankCategory {
     private String name;
