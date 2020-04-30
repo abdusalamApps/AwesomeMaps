@@ -235,6 +235,7 @@ public class MapGUI extends Application {
         Label label = new Label("Categories");
 
         ListView<String> catListView = new ListView<>();
+        catListView.setPrefSize(50, 80);
         List<String> categories = new ArrayList<>();
         categories.add("Bus");
         categories.add("Underground");
