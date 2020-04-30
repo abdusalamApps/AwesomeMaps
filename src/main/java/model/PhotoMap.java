@@ -36,6 +36,23 @@ public class PhotoMap {
         marked.clear();
     }
 
+    public void hideCategory(String category) {
+        for (Place place : allPlaces.values()) {
+            if (place.getCategory().getName().equals(category)) {
+                hidden.add(place);
+                marked.remove(place);
+            }
+        }
+    }
+
+    public void showCategory(String category) {
+        for (Place place : hidden) {
+            if (place.getCategory().getName().equals(category)) {
+                hidden.remove(place);
+            }
+        }
+    }
+
     public void remove() {
         for (Place place : marked) {
             allPlaces.remove(getKey(place));
