@@ -46,10 +46,12 @@ public class MapData {
     }
 
     public void showCategory(String category) {
+        hidden.removeIf(place -> place.getCategory().getName().equals(category));
+    }
+
+    public void printHidden() {
         for (Place place : hidden) {
-            if (place.getCategory().getName().equals(category)) {
-                hidden.remove(place);
-            }
+            System.out.println(place);
         }
     }
 

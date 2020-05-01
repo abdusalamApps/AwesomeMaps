@@ -16,9 +16,7 @@ import javafx.scene.shape.Shape;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.*;
 import java.util.*;
 
 import javafx.collections.FXCollections;
@@ -85,7 +83,42 @@ public class MapGUI extends Application {
         });
 
         MenuItem saveItem = new MenuItem("Save");
+        saveItem.setOnAction(e -> {
+            FileChooser fileChooser = new FileChooser();
+            FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("(*.places)", "*.places");
+            fileChooser.getExtensionFilters().add(extFilter);
+            File file = fileChooser.showSaveDialog(primaryStage);
+            try {
+                PrintWriter writer = new PrintWriter(file);
+
+                for (Map.Entry<Position, Place> entry : mapData.getAllPlaces().entrySet()) {
+                    Place place = entry.getValue();
+                    if (place.getClass().equals(NamedPlace.class)) {
+                        writer.append("Named").append(",");
+                    } else if (place.getClass().equals(DescribedPlace.class)) {
+                        writer.append("Described").append(",");
+                    }
+                    writer.append(place.getCategory().getName()).append(",");
+                    writer.append(String.valueOf(entry.getKey().getX())).append(",");
+                    writer.append(String.valueOf(entry.getKey().getY())).append(",");
+                    writer.append(place.getName());
+                    if (place.getClass().equals(NamedPlace.class)) {
+                        writer.append("\n");
+                    } else if (place.getClass().equals(DescribedPlace.class)) {
+                        writer.append(((DescribedPlace) place).getDescription()).append("\n");
+                    }
+                }
+                writer.close();
+
+            } catch (FileNotFoundException e1) {
+                e1.printStackTrace();
+            }
+        });
+
         MenuItem exitItem = new MenuItem("Exit");
+        exitItem.setOnAction(e -> {
+            System.exit(0);
+        });
         menu.getItems().addAll(loadMapItem, loadPlacesItem, saveItem, exitItem);
         menuBar.getMenus().add(menu);
         return menuBar;
@@ -143,6 +176,7 @@ public class MapGUI extends Application {
 
     private void showCoordinatesDialog() {
         Dialog<Place> dialog = new Dialog<>();
+
         dialog.setTitle("Coordinates");
         dialog.setResizable(true);
 
@@ -160,6 +194,7 @@ public class MapGUI extends Application {
 
         ButtonType cancelType = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
         ButtonType okType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
+
         dialog.setResultConverter(buttonType -> {
             if (buttonType.equals(okType)) {
                 int x = Integer.parseInt(xField.getText());
@@ -244,10 +279,15 @@ public class MapGUI extends Application {
 
         Button hideCatButton = new Button("Hide Category");
         hideCatButton.setOnAction(e -> {
-            System.out.println(
-                    catListView.getSelectionModel().getSelectedItem()
-            );
+            mapData.hideCategory(catListView.getSelectionModel().getSelectedItem());
+            updateMarkers();
         });
+
+        catListView.getSelectionModel().selectedItemProperty().addListener((obs, oldV, newV) -> {
+            mapData.showCategory(newV);
+            updateMarkers();
+        });
+
         vbox.getChildren().addAll(label, catListView, hideCatButton);
         return vbox;
     }
@@ -313,11 +353,12 @@ public class MapGUI extends Application {
         return placeMap;
     }
 
-
     private void updateMarkers() {
         mapStackPane.getChildren().clear();
         mapStackPane.getChildren().add(imageView);
+
         for (Map.Entry<Position, Place> entry : mapData.getAllPlaces().entrySet()) {
+
             Polyline polyline = new Polyline();
             polyline.setManaged(false);
 

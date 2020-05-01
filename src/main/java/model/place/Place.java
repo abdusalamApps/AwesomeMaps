@@ -27,6 +27,11 @@ public abstract class Place {
         this.category = category;
     }
 
-
-
+    @Override
+    public String toString() {
+        return "Place{" +
+                "name='" + name + '\'' +
+                ", category=" + category.getName() +
+                '}';
+    }
 }
