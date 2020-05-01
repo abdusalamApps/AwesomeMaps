@@ -46,13 +46,14 @@ public class MapGUI extends Application {
     private ToggleGroup typeToggleGroup;
     private BlankCategory newCategory;
     private ListView<String> catListView;
-
+    private Button newButton;
     @Override
     public void start(Stage primaryStage) throws Exception {
         this.primaryStage = primaryStage;
         mapData = new MapData();
         newCategory = new BlankCategory();
         catListView = new ListView<>();
+        newButton = new Button("New");
 
         catListView.getSelectionModel().selectedItemProperty().addListener((obs, oldV, newV) -> {
             System.out.println(newV);
@@ -220,8 +221,12 @@ public class MapGUI extends Application {
                     RadioButton selectedToggle = (RadioButton) typeToggleGroup.getSelectedToggle();
                     if (selectedToggle.getText().equals("Named")) {
                         makeNamedPlace(e);
+                        scene.setCursor(Cursor.DEFAULT);
+                        mapStackPane.setOnMouseClicked(null);
                     } else if (selectedToggle.getText().equals("Described")) {
                         makeDescribedPlace(e);
+                        scene.setCursor(Cursor.DEFAULT);
+                        mapStackPane.setOnMouseClicked(null);
                     }
                 }
             }
@@ -235,8 +240,9 @@ public class MapGUI extends Application {
         topContainer.setPadding(new Insets(15, 12, 15, 12));
         topContainer.setSpacing(10.0);
 
-        Button newButton = new Button("New");
-        newButton.setOnAction(e -> makeNewPlace());
+        newButton.setOnAction(e -> {
+            makeNewPlace();
+        });
 
         TextField textField = new TextField();
 
