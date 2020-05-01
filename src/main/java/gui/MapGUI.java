@@ -4,10 +4,13 @@ import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;
+import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -33,7 +36,6 @@ import model.place.Place;
 
 
 public class MapGUI extends Application {
-    private FlowPane mainContainer;
     private Scene scene;
     private ImageView imageView = new ImageView();
     private Stage primaryStage;
@@ -41,10 +43,27 @@ public class MapGUI extends Application {
     private MapData mapData;
     private StackPane mapStackPane;
 
+    private ToggleGroup typeToggleGroup;
+    private BlankCategory newCategory;
+    private ListView<String> catListView;
+
     @Override
     public void start(Stage primaryStage) throws Exception {
         this.primaryStage = primaryStage;
         mapData = new MapData();
+        newCategory = new BlankCategory();
+        catListView = new ListView<>();
+
+        catListView.getSelectionModel().selectedItemProperty().addListener((obs, oldV, newV) -> {
+            System.out.println(newV);
+            if (newV.equals("Bus")) {
+                newCategory = new BusCategory();
+            } else if (newV.equals("Train")) {
+                newCategory = new TrainCategory();
+            } else if (newV.equals("Underground")) {
+                newCategory = new UndergroundCategory();
+            }
+        });
 
 
         initializeMainContainer();
@@ -124,6 +143,91 @@ public class MapGUI extends Application {
         return menuBar;
     }
 
+    private void makeNamedPlace(MouseEvent event) {
+        Dialog<String> dialog = new Dialog<>();
+        HBox hBox = new HBox();
+        Label nameLabel = new Label("Name:  ");
+        TextField nameField = new TextField();
+        hBox.getChildren().addAll(nameLabel, nameField);
+
+        ButtonType cancelType = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+        ButtonType okType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
+        dialog.setResultConverter(buttonType -> {
+            if (buttonType.equals(okType)) {
+                Place newPlace = new NamedPlace(
+                        nameField.getText(),
+                        newCategory
+                );
+                mapData.add(event.getX(), event.getY(), newPlace);
+                updateMarkers();
+            }
+            return null;
+        });
+
+        dialog.getDialogPane().getButtonTypes().addAll(cancelType, okType);
+        dialog.getDialogPane().setContent(hBox);
+        dialog.show();
+    }
+
+    private void makeDescribedPlace(MouseEvent event) {
+        Dialog<String> dialog = new Dialog<>();
+        GridPane gridPane = new GridPane();
+        Label nameLabel = new Label("Name:  ");
+        Label descriptionLabel = new Label("Description:    ");
+        TextField nameField = new TextField();
+        TextField descriptionField = new TextField();
+
+        gridPane.add(nameLabel, 1, 1);
+        gridPane.add(nameField, 2, 1);
+        gridPane.add(descriptionLabel, 1, 2);
+        gridPane.add(descriptionField, 2, 2);
+
+        ButtonType cancelType = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+        ButtonType okType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
+        dialog.setResultConverter(buttonType -> {
+            if (buttonType.equals(okType)) {
+                Place newPlace = new DescribedPlace(
+                        nameField.getText(),
+                        newCategory,
+                        descriptionField.getText()
+                );
+                mapData.add(event.getX(), event.getY(), newPlace);
+                updateMarkers();
+            }
+            return null;
+        });
+
+        dialog.getDialogPane().getButtonTypes().addAll(cancelType, okType);
+        dialog.getDialogPane().setContent(gridPane);
+        dialog.show();
+    }
+
+    private void makeNewPlace() {
+        scene.setCursor(Cursor.CROSSHAIR);
+        mapStackPane.setOnMouseClicked(e -> {
+            if (e.getButton() == MouseButton.PRIMARY) {
+                boolean placeExist = false;
+                for (Position position : mapData.getAllPlaces().keySet()) {
+                    if (Math.abs(position.getX() - e.getX()) < 5 && Math.abs(position.getY() - e.getY()) < 5) {
+                        Alert alert = new Alert(Alert.AlertType.ERROR);
+                        alert.setContentText("det är endast tillåtet med en plats per position ");
+                        alert.show();
+                        placeExist = true;
+                        break;
+                    }
+                }
+                if (!placeExist) {
+                    RadioButton selectedToggle = (RadioButton) typeToggleGroup.getSelectedToggle();
+                    if (selectedToggle.getText().equals("Named")) {
+                        makeNamedPlace(e);
+                    } else if (selectedToggle.getText().equals("Described")) {
+                        makeDescribedPlace(e);
+                    }
+                }
+            }
+        });
+    }
+
     private Pane getTopPane() {
         HBox topContainer = new HBox();
 //        topContainer.setBackground(new Background(new BackgroundFill(Color.YELLOW, null, null)));
@@ -132,6 +236,7 @@ public class MapGUI extends Application {
         topContainer.setSpacing(10.0);
 
         Button newButton = new Button("New");
+        newButton.setOnAction(e -> makeNewPlace());
 
         TextField textField = new TextField();
 
@@ -235,11 +340,11 @@ public class MapGUI extends Application {
 
         VBox radioBox = new VBox();
         radioBox.setSpacing(10.0);
-        ToggleGroup toggleGroup = new ToggleGroup();
+        typeToggleGroup = new ToggleGroup();
         RadioButton namedRadio = new RadioButton("Named");
-        namedRadio.setToggleGroup(toggleGroup);
+        namedRadio.setToggleGroup(typeToggleGroup);
         RadioButton describedRadio = new RadioButton("Described");
-        describedRadio.setToggleGroup(toggleGroup);
+        describedRadio.setToggleGroup(typeToggleGroup);
         radioBox.getChildren().addAll(namedRadio, describedRadio);
 
         return radioBox;
@@ -273,8 +378,7 @@ public class MapGUI extends Application {
         vbox.setSpacing(10);
         Label label = new Label("Categories");
 
-        ListView<String> catListView = new ListView<>();
-        catListView.setPrefSize(50, 80);
+        catListView.setPrefSize(60, 80);
         List<String> categories = new ArrayList<>();
         categories.add("Bus");
         categories.add("Underground");
@@ -384,7 +488,6 @@ public class MapGUI extends Application {
             }
 
         }
-        System.out.println("Stack Pane Children " + mapStackPane.getChildren().size());
     }
 }
 

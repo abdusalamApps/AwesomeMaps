@@ -77,30 +77,18 @@ public class MapData {
     }
 
 
-    public static void main(String[] args) {
-        Map<Position, Place> map = new HashMap<>();
-        map.put(
-                new Position(1, 1),
-                new NamedPlace("Larvi", new BusCategory())
+    public void add(int x, int y, Place place) {
+        allPlaces.put(
+                new Position(x, y),
+                place
         );
-        map.put(
-                new Position(1, 4),
-                new NamedPlace("Huset", new BusCategory())
+    }
+
+    public void add(double x, double y, Place place) {
+        allPlaces.put(
+                new Position((int) x, (int) y),
+                place
         );
-        map.put(
-                new Position(1, 5),
-                new NamedPlace("Gatan", new BusCategory())
-        );
-        MapData mapData = new MapData();
-        mapData.setAllPlaces(map);
-
-        System.out.println("------getPlaceByCoordinates() return value-------");
-        System.out.println(mapData.getPlaceByCoordinates(1, 4));
-
-        System.out.println("------Marked Places-----");
-        for (Place place : mapData.marked)
-            System.out.println(place.getName());
-
     }
 
     public Map<Position, Place> getAllPlaces() {
