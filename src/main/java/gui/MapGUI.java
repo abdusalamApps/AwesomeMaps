@@ -199,11 +199,15 @@ public class MapGUI extends Application {
             if (buttonType.equals(okType)) {
                 int x = Integer.parseInt(xField.getText());
                 int y = Integer.parseInt(yField.getText());
-                mapData.getPlaceByCoordinates(
-                        x,
-                        y
-                );
-                updateMarkers();
+                String placeByCoordinates = mapData.getPlaceByCoordinates(x, y);
+                if (placeByCoordinates.equalsIgnoreCase("not found")) {
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Place Not Found!");
+                    alert.setContentText("There is no place in the coordinates you entered.");
+                    alert.show();
+                } else {
+                    updateMarkers();
+                }
             }
             return null;
         });
