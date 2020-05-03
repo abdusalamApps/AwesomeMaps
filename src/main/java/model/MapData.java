@@ -58,13 +58,15 @@ public class MapData {
     }
 
     public void remove() {
+        if (!marked.isEmpty()) {
+            changed = true;
+        }
         for (Place place : marked) {
             allPlaces.entrySet().removeIf(
                     entry -> (place.equals(entry.getValue()))
             );
         }
         marked.clear();
-        changed = true;
     }
 
     public String getPlaceByCoordinates(int x, int y) {
