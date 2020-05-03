@@ -77,7 +77,12 @@ public class MapGUI extends Application {
             if (e.getButton() == MouseButton.PRIMARY) {
                 for (Position position : mapData.getAllPlaces().keySet()) {
                     if (Math.abs(position.getX() - e.getX()) < 5 && Math.abs(position.getY() - e.getY()) < 5) {
-                        mapData.markPlace(mapData.getAllPlaces().get(position));
+                        Place place = mapData.getAllPlaces().get(position);
+                        if (mapData.getMarked().contains(place)) {
+                            mapData.getMarked().remove(place);
+                        } else {
+                            mapData.markPlace(place);
+                        }
                         updateMarkers();
                         break;
                     }
