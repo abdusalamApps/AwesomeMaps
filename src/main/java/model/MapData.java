@@ -24,7 +24,7 @@ public class MapData {
         marked.clear();
 
         for (Place place : allPlaces.values()) {
-            if (place.getName().equals(placeName)) {
+            if (place.getName().equalsIgnoreCase(placeName)) {
                 hidden.remove(place);
                 marked.add(place);
             }
@@ -91,7 +91,7 @@ public class MapData {
         );
     }
 
-    public void markPalace(Place place) {
+    public void markPlace(Place place) {
         marked.add(place);
     }
 
