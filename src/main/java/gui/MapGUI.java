@@ -447,7 +447,7 @@ public class MapGUI extends Application {
         vbox.setSpacing(10);
         Label label = new Label("Categories");
 
-        catListView.setPrefSize(60, 80);
+        catListView.setPrefSize(80, 100);
         List<String> categories = new ArrayList<>();
         categories.add("Bus");
         categories.add("Underground");
