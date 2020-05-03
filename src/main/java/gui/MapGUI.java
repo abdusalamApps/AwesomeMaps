@@ -13,9 +13,7 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polyline;
-import javafx.scene.shape.Shape;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -23,7 +21,6 @@ import java.io.*;
 import java.util.*;
 
 import javafx.collections.FXCollections;
-import javafx.util.Callback;
 import model.MapData;
 import model.Position;
 import model.category.BlankCategory;
@@ -54,6 +51,9 @@ public class MapGUI extends Application {
         newCategory = new BlankCategory();
         catListView = new ListView<>();
         newButton = new Button("New");
+        mapStackPane = new StackPane();
+
+        defaultMapMouseActions();
 
         catListView.getSelectionModel().selectedItemProperty().addListener((obs, oldV, newV) -> {
             System.out.println(newV);
@@ -72,6 +72,39 @@ public class MapGUI extends Application {
         primaryStage.show();
     }
 
+    private void defaultMapMouseActions() {
+        mapStackPane.setOnMouseClicked(e -> {
+            if (e.getButton() == MouseButton.PRIMARY) {
+                for (Position position : mapData.getAllPlaces().keySet()) {
+                    if (Math.abs(position.getX() - e.getX()) < 5 && Math.abs(position.getY() - e.getY()) < 5) {
+                        mapData.markPlace(mapData.getAllPlaces().get(position));
+                        updateMarkers();
+                        break;
+                    }
+                }
+
+            } else if (e.getButton() == MouseButton.SECONDARY) {
+                for (Position position : mapData.getAllPlaces().keySet()) {
+                    if (Math.abs(position.getX() - e.getX()) < 5 && Math.abs(position.getY() - e.getY()) < 5) {
+                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                        Place place = mapData.getAllPlaces().get(position);
+                        StringBuilder builder = new StringBuilder();
+                        String nameLine = "Name: " + place.getName();
+                        builder.append(nameLine).append("\n");
+                        String descriptionLine = "Description: ";
+                        if (place.getClass().equals(DescribedPlace.class)) {
+                            descriptionLine += ((DescribedPlace) place).getDescription();
+                            builder.append(descriptionLine);
+                        }
+                        alert.setContentText(builder.toString());
+                        alert.show();
+                        break;
+                    }
+                }
+
+            }
+        });
+    }
 
     private void initializeMainContainer() {
         VBox mainContainer = new VBox();
@@ -222,11 +255,11 @@ public class MapGUI extends Application {
                     if (selectedToggle.getText().equals("Named")) {
                         makeNamedPlace(e);
                         scene.setCursor(Cursor.DEFAULT);
-                        mapStackPane.setOnMouseClicked(null);
+                        defaultMapMouseActions();
                     } else if (selectedToggle.getText().equals("Described")) {
                         makeDescribedPlace(e);
                         scene.setCursor(Cursor.DEFAULT);
-                        mapStackPane.setOnMouseClicked(null);
+                        defaultMapMouseActions();
                     }
                 }
             }
@@ -360,7 +393,6 @@ public class MapGUI extends Application {
         HBox bottomBox = new HBox();
         bottomBox.setMinWidth(800);
 //        bottomBox.setBackground(new Background(new BackgroundFill(Color.DARKGRAY, null, null)));
-        mapStackPane = new StackPane();
 
         mapStackPane.getChildren().addAll(imageView);
         bottomBox.getChildren().addAll(mapStackPane, getBottomRightPane());
