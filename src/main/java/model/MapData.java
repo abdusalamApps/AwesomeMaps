@@ -13,11 +13,13 @@ public class MapData {
     private Map<Position, Place> allPlaces;
     private Set<Place> hidden;
     private Set<Place> marked;
+    private boolean changed;
 
     public MapData() {
         allPlaces = new HashMap<>();
         hidden = new HashSet<>();
         marked = new HashSet<>();
+        changed = false;
     }
 
     public void search(String placeName) {
@@ -57,13 +59,12 @@ public class MapData {
 
     public void remove() {
         for (Place place : marked) {
-            allPlaces.entrySet()
-                    .removeIf( entry -> (
-                            place.equals(entry.getValue()
-                            )
-                    ));
+            allPlaces.entrySet().removeIf(
+                    entry -> (place.equals(entry.getValue()))
+            );
         }
         marked.clear();
+        changed = true;
     }
 
     public String getPlaceByCoordinates(int x, int y) {
@@ -78,17 +79,13 @@ public class MapData {
 
 
     public void add(int x, int y, Place place) {
-        allPlaces.put(
-                new Position(x, y),
-                place
-        );
+        allPlaces.put(new Position(x, y), place);
+        changed = true;
     }
 
     public void add(double x, double y, Place place) {
-        allPlaces.put(
-                new Position((int) x, (int) y),
-                place
-        );
+        allPlaces.put(new Position((int) x, (int) y), place);
+        changed = true;
     }
 
     public void markPlace(Place place) {
@@ -126,5 +123,13 @@ public class MapData {
 
     public void setMarked(Set<Place> marked) {
         this.marked = marked;
+    }
+
+    public boolean isChanged() {
+        return changed;
+    }
+
+    public void setChanged(boolean changed) {
+        this.changed = changed;
     }
 }

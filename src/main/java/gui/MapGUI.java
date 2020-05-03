@@ -163,11 +163,11 @@ public class MapGUI extends Application {
                     if (place.getClass().equals(NamedPlace.class)) {
                         writer.append("\n");
                     } else if (place.getClass().equals(DescribedPlace.class)) {
-                        writer.append(((DescribedPlace) place).getDescription()).append("\n");
+                        writer.append(",").append(((DescribedPlace) place).getDescription()).append("\n");
                     }
                 }
                 writer.close();
-
+                mapData.setChanged(false);
             } catch (FileNotFoundException e1) {
                 e1.printStackTrace();
             }
@@ -175,7 +175,13 @@ public class MapGUI extends Application {
 
         MenuItem exitItem = new MenuItem("Exit");
         exitItem.setOnAction(e -> {
-            System.exit(0);
+            if (mapData.isChanged()) {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setContentText("Unsaved changes");
+                alert.show();
+            } else {
+                System.exit(0);
+            }
         });
         menu.getItems().addAll(loadMapItem, loadPlacesItem, saveItem, exitItem);
         menuBar.getMenus().add(menu);
