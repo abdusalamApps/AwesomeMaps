@@ -44,6 +44,7 @@ public class MapGUI extends Application {
     private BlankCategory newCategory;
     private ListView<String> catListView;
     private Button newButton;
+
     @Override
     public void start(Stage primaryStage) throws Exception {
         this.primaryStage = primaryStage;
@@ -95,7 +96,7 @@ public class MapGUI extends Application {
                         Place place = mapData.getAllPlaces().get(position);
                         StringBuilder builder = new StringBuilder();
                         String nameLine = "Name: " + place.getName();
-                        builder.append(nameLine).append("\n");
+                        builder.append(nameLine).append("[").append(position.getX()).append(",").append(position.getY()).append("]").append("\n");
                         String descriptionLine = "Description: ";
                         if (place.getClass().equals(DescribedPlace.class)) {
                             descriptionLine += ((DescribedPlace) place).getDescription();
@@ -125,52 +126,71 @@ public class MapGUI extends Application {
         MenuItem loadMapItem = new MenuItem("Load Map");
 
         loadMapItem.setOnAction(e -> {
-            FileChooser fileChooser = new FileChooser();
-            fileChooser.setTitle("Choose Map");
-            File file = fileChooser.showOpenDialog(primaryStage);
-            loadImage(file.getPath());
+            if (mapData.isChanged()) {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setContentText("There is unsaved changes");
+                alert.show();
+            } else {
+                FileChooser fileChooser = new FileChooser();
+                fileChooser.setTitle("Choose Map");
+                File file = fileChooser.showOpenDialog(primaryStage);
+                loadImage(file.getPath());
+            }
         });
 
         MenuItem loadPlacesItem = new MenuItem("Load Places");
         loadPlacesItem.setOnAction(e -> {
-            FileChooser fileChooser = new FileChooser();
-            fileChooser.setTitle("Load Places");
-            File file = fileChooser.showOpenDialog(primaryStage);
-            mapData.setAllPlaces(loadPlaces(file));
-            updateMarkers();
+            if (mapData.isChanged()) {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setContentText("There is unsaved changes");
+                alert.show();
+            } else {
+                FileChooser fileChooser = new FileChooser();
+                fileChooser.setTitle("Load Places");
+                File file = fileChooser.showOpenDialog(primaryStage);
+                mapData.setAllPlaces(loadPlaces(file));
+                updateMarkers();
+            }
         });
 
         MenuItem saveItem = new MenuItem("Save");
         saveItem.setOnAction(e -> {
-            FileChooser fileChooser = new FileChooser();
-            FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("(*.places)", "*.places");
-            fileChooser.getExtensionFilters().add(extFilter);
-            File file = fileChooser.showSaveDialog(primaryStage);
-            try {
-                PrintWriter writer = new PrintWriter(file);
+            if (mapData.isChanged()) {
+                FileChooser fileChooser = new FileChooser();
+                FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("(*.places)", "*.places");
+                fileChooser.getExtensionFilters().add(extFilter);
+                File file = fileChooser.showSaveDialog(primaryStage);
+                try {
+                    PrintWriter writer = new PrintWriter(file);
 
-                for (Map.Entry<Position, Place> entry : mapData.getAllPlaces().entrySet()) {
-                    Place place = entry.getValue();
-                    if (place.getClass().equals(NamedPlace.class)) {
-                        writer.append("Named").append(",");
-                    } else if (place.getClass().equals(DescribedPlace.class)) {
-                        writer.append("Described").append(",");
+                    for (Map.Entry<Position, Place> entry : mapData.getAllPlaces().entrySet()) {
+                        Place place = entry.getValue();
+                        if (place.getClass().equals(NamedPlace.class)) {
+                            writer.append("Named").append(",");
+                        } else if (place.getClass().equals(DescribedPlace.class)) {
+                            writer.append("Described").append(",");
+                        }
+                        writer.append(place.getCategory().getName()).append(",");
+                        writer.append(String.valueOf(entry.getKey().getX())).append(",");
+                        writer.append(String.valueOf(entry.getKey().getY())).append(",");
+                        writer.append(place.getName());
+                        if (place.getClass().equals(NamedPlace.class)) {
+                            writer.append("\n");
+                        } else if (place.getClass().equals(DescribedPlace.class)) {
+                            writer.append(",").append(((DescribedPlace) place).getDescription()).append("\n");
+                        }
                     }
-                    writer.append(place.getCategory().getName()).append(",");
-                    writer.append(String.valueOf(entry.getKey().getX())).append(",");
-                    writer.append(String.valueOf(entry.getKey().getY())).append(",");
-                    writer.append(place.getName());
-                    if (place.getClass().equals(NamedPlace.class)) {
-                        writer.append("\n");
-                    } else if (place.getClass().equals(DescribedPlace.class)) {
-                        writer.append(",").append(((DescribedPlace) place).getDescription()).append("\n");
-                    }
+                    writer.close();
+                    mapData.setChanged(false);
+                } catch (FileNotFoundException e1) {
+                    e1.printStackTrace();
                 }
-                writer.close();
-                mapData.setChanged(false);
-            } catch (FileNotFoundException e1) {
-                e1.printStackTrace();
+            } else {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setContentText("You did not make any changes!");
+                alert.show();
             }
+
         });
 
         MenuItem exitItem = new MenuItem("Exit");
