@@ -91,6 +91,10 @@ public class MapData {
         );
     }
 
+    public void markPalace(Place place) {
+        marked.add(place);
+    }
+
     public Map<Position, Place> getAllPlaces() {
         return allPlaces;
     }
