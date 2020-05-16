@@ -3,6 +3,7 @@ package gui;
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
@@ -21,6 +22,7 @@ import java.io.*;
 import java.util.*;
 
 import javafx.collections.FXCollections;
+import javafx.stage.WindowEvent;
 import model.MapData;
 import model.Position;
 import model.category.BlankCategory;
@@ -34,12 +36,10 @@ import model.place.Place;
 
 public class MapGUI extends Application {
     private Scene scene;
-    private ImageView imageView = new ImageView();
+    private ImageView imageView;
     private Stage primaryStage;
-
     private MapData mapData;
     private StackPane mapStackPane;
-
     private ToggleGroup typeToggleGroup;
     private BlankCategory newCategory;
     private ListView<String> catListView;
@@ -53,6 +53,10 @@ public class MapGUI extends Application {
         catListView = new ListView<>();
         newButton = new Button("New");
         mapStackPane = new StackPane();
+        imageView = new ImageView();
+
+        FileInputStream inputStream = new FileInputStream("C:/AwesomeMaps/exempelkarta.png");
+        imageView.setImage(new Image(inputStream));
 
         defaultMapMouseActions();
 
@@ -67,6 +71,32 @@ public class MapGUI extends Application {
             }
         });
 
+        primaryStage.setOnCloseRequest(event -> {
+            if (mapData.isChanged()) {
+                Dialog<String> dialog = new Dialog<>();
+                HBox hBox = new HBox();
+                Label messageLabel = new Label("Unsaved changes!");
+                hBox.getChildren().addAll(messageLabel);
+
+                ButtonType cancelType = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+                ButtonType exitType = new ButtonType("Exit", ButtonBar.ButtonData.OK_DONE);
+                dialog.setResultConverter(buttonType -> {
+                    if (buttonType.equals(exitType)) {
+                        System.exit(0);
+                    }
+                    return null;
+                });
+
+                dialog.getDialogPane().getButtonTypes().addAll(cancelType, exitType);
+                dialog.getDialogPane().setContent(hBox);
+                dialog.show();
+
+                event.consume();
+            } else {
+                System.exit(0);
+            }
+
+        });
 
         initializeMainContainer();
         primaryStage.setScene(scene);
